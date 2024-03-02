@@ -158,7 +158,6 @@ const tasmota_tls_fingerprint = (_=>{
 
     // add SHA1 padding
     resultU8[offset] = 0x80;
-    // XXX I AM NOT 100% SURE THIS IS RIGHT - IT MAY HAVE AN OFF-BY-ONE!
     let blockEnd = offset + 72 & ~63;
     resultDV.setUint32(blockEnd-4, offset * 8, false);
 

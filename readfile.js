@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: CC0-1.0+ OR 0BSD OR MIT-0
+// Copyright (c) 2024 Ryan Castellucci, No Rights Reserved
 const fs = require('fs');
 const files = process.argv.slice(2);
+// read stdin if no filenames were provided
 if (!files.length) { files.push(0); }
-
 for (const file of files) {
   const label = typeof file === 'number' ? 'STDIN' : file;
   try {
