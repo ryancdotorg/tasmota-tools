@@ -51,7 +51,7 @@ const tasmota_tls_fingerprint = (_=>{
     // atob returns the byte values in a string... :-(
     str = atob(str);
 
-    for (let n = str.length, u8 = new Uint8Array(n); n;) {
+    for (var n = str.length, u8 = new Uint8Array(n); n;) {
       u8[--n] = str.charCodeAt(n);
     }
 
