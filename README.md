@@ -15,3 +15,6 @@ your option:
 
 The [SPDX](https://spdx.dev) license identifier for this project is
 `CC0-1.0+ OR 0BSD OR MIT-0`.
+
+In other words, this project is effectively “public domain”, but don’t hold me
+responsible if it makes demons fly out of your nose.
