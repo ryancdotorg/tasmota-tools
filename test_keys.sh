@@ -3,6 +3,8 @@ set -uo pipefail
 trap 's=$?; echo ": Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 IFS=$'\n\t'
 
+make clean cli.min.js
+
 for e in 3 17 257 65537 4294967297
 do
   for bits in 1024 2048 3072 4096 `seq 1536 4 1600`
