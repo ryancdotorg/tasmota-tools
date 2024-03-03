@@ -1,5 +1,5 @@
-/*! SPDX-License-Identifier: CC0-1.0+ OR 0BSD OR MIT-0 */
-/*! Copyright (c) 2024 Ryan Castellucci, No Rights Reserved */
+/* SPDX-License-Identifier: CC0-1.0+ OR 0BSD OR MIT-0 */
+/* Copyright (c) 2024 Ryan Castellucci, No Rights Reserved */
 
 const tasmota_tls_fingerprint = (_=>{
   // golfed SHA1, reuses variables for size; the data has to be already padded
