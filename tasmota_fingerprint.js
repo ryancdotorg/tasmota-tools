@@ -127,7 +127,7 @@ const tasmota_tls_fingerprint = (_=>{
         if (!toSave_blockEnd) {
           toSave_blockEnd =
             len == 9 && // OID of rsaEncryption
-            b64d('KoZIhvcNAQEB').every((v, i) => v == value[i]) * 2;
+            !b64d('KoZIhvcNAQEB').some((v, i) => v ^ value[i]) * 2;
         } else {
           // save the rsa public key data... if there's a leading zero, it
           // needs to be removed for compatibility with Tasmota and BearSSL
