@@ -18,9 +18,7 @@ const tasmota_tls_fingerprint = (_=>{
     }
 
     for (i = j = 0; i < n; i += 16) {
-      A = H;
-
-      for (; j < 80;
+      for (A = H; j < 80;
         A = [
           (
             A[4] +
@@ -81,6 +79,7 @@ const tasmota_tls_fingerprint = (_=>{
     let type = u8[off++] & 31;
 
     // values larger than 30 are encoded in additional bytes
+    // these don't seem to be used in certificates, can maybe be disabled?
     if (type == 31) {
       for (type = 0; tmp >> 7;) {
         tmp = u8[off++];
@@ -110,14 +109,14 @@ const tasmota_tls_fingerprint = (_=>{
     const pubKeyData = [b64d('c3NoLXJzYQ==')]; // "ssh-rsa"
     const resultU8 = new Uint8Array(2048);
     const resultDV = new DataView(resultU8.buffer);
-    let der = pemToDer(data);
-    let n, i, offset = 0, toSave_blockEnd;
+    let der_i = pemToDer(data);
+    let offset = 0, toSave_blockEnd;
 
     // crudely parse the ASN.1 data
-    while (offset < der.length) {
-      const [
+    while (offset < der_i.length) {
+      let [
         new_offset, not_form, type, len, value
-      ] = /*@__INLINE__*/getAsn1TLV(der, offset);
+      ] = /*@__INLINE__*/ getAsn1TLV(der_i, offset);
       //console.log(der.length, offset, new_offset, toSave_blockEnd, form, type, len, value.toString());
 
       // we discard everyting until we find an rsa public key oui
@@ -133,12 +132,12 @@ const tasmota_tls_fingerprint = (_=>{
           // we're done once we have the key
           if (!(--toSave_blockEnd)) {
             // serialize the public key in tasmota's "new" format
-            for (offset = i = 0; i < 3;) {
+            for (offset = der_i = 0; der_i < 3;) {
               // 4 byte big endian length
-              resultDV.setUint32(offset, n = pubKeyData[i].length);
+              resultDV.setUint32(offset, len = pubKeyData[der_i].length);
               // actual data
-              resultU8.set(pubKeyData[i++], offset += 4);
-              offset += n;
+              resultU8.set(pubKeyData[der_i++], offset += 4);
+              offset += len;
             }
 
             // add SHA1 padding
@@ -152,14 +151,14 @@ const tasmota_tls_fingerprint = (_=>{
         }
       }
 
-      // skip over the data unles the form bit is set
+      // skip over the data unless the form bit is set
       offset = new_offset + not_form * len; // (form ? 0 : len);
       // type 3 is "BIT STRING" and should contain the key as ASN.1 data
       if (type == 3) {
         // need to skip the first byte, not sure why
         offset = 1;
         // deeper!
-        der = value;
+        der_i = value;
       }
     }
   };
