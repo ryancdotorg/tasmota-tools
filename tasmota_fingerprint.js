@@ -151,7 +151,7 @@ const tasmota_tls_fingerprint = (_=>{
     }
 
     // serialize the public key in tasmota's "new" format
-    for (offset = 0, i = 0; i < 3; ++i) {
+    for (offset = i = 0; i < 3; ++i) {
       // 4 byte big endian length
       resultDV.setUint32(offset, n = pubKeyData[i].length);
       offset += 4;
