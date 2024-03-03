@@ -11,6 +11,6 @@ for (const file of files) {
     const fingerprint = tasmota_tls_fingerprint(data);
     console.log(`${label}: ${fingerprint}`);
   } catch (e) {
-    console.log(`${label}: ${e}`);
+    console.log(`${label}: ${e.stack}`);
   }
 }
