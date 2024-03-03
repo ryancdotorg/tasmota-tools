@@ -7,32 +7,60 @@ import ssl
 
 from hashlib import sha1
 
+def _cryptography_rsa_pub_params(pem):
+    cert = x509.load_pem_x509_certificate(pem)
+    rsa = cert.public_key().public_numbers()
+    return (rsa.e, rsa.n)
+
+def _cryptodome_rsa_pub_params(pem):
+    rsa = RSA.importKey(pem)
+    return (rsa.e, rsa.n)
+
+def _subprocess_rsa_pub_params(pem):
+    e, n = None, None
+
+    result = subprocess.run(
+        ['openssl', 'x509', '-noout', '-text'],
+        input=pem, capture_output=True
+    )
+
+    data = re.sub(r':\n\s+', ':', result.stdout.decode())
+
+    for line in data.split('\n'):
+        m = re.match(r'\s*(Modulus|Exponent):\s*(\S+)', line)
+        if m is not None:
+            label, value = m.groups()
+
+            if ':' in value:
+                value = int(value.replace(':',''), 16)
+            else:
+                value = int(value)
+
+            if label == 'Modulus':
+                n = value
+            elif label == 'Exponent':
+                e = value
+
+    return (e, n)
+
 try:
-    # prefer cryptography module
+    # prefer the cryptography module
     from cryptography import x509
-
-    def rsa_pub_params(pem):
-        cert = x509.load_pem_x509_certificate(pem)
-        rsa = cert.public_key().public_numbers()
-        return (rsa.e, rsa.n)
-
+    rsa_pub_params = _cryptography_rsa_pub_params
 except ModuleNotFoundError:
-    # fallback to pycryptodome module
     try:
+        # fallback to pycryptodome module
         from Cryptodome.PublicKey import RSA
+        rsa_pub_params = _cryptodome_rsa_pub_params
     except ModuleNotFoundError:
         try:
+            # pycryptodome could be installed as `Crypto`
             from Crypto.PublicKey import RSA
+            rsa_pub_params = _cryptodome_rsa_pub_params
         except ModuleNotFoundError:
-            print(
-                f'{sys.argv[0]}: Either the `cryptography` or `pycryptodome` module is required.',
-                file=sys.stderr
-            )
-            sys.exit(1)
-
-    def rsa_pub_params(pem):
-        rsa = RSA.importKey(pem)
-        return (rsa.e, rsa.n)
+            # fine, whatever, we can just run `openssl`
+            import subprocess, re
+            rsa_pub_params = _subprocess_rsa_pub_params
 
 def get_server_certificate(hostname, port=8883):
     import ssl, socket
@@ -54,9 +82,7 @@ def get_server_certificate(hostname, port=8883):
     with socket.create_connection((hostname, port)) as sock:
         with ctx.wrap_socket(sock, server_hostname=hostname) as ssock:
             der = ssock.getpeercert(True)
-            pem = ssl.DER_cert_to_PEM_cert(der).encode()
-            print(rsa_pub_params(pem))
-            return pem
+            return ssl.DER_cert_to_PEM_cert(der).encode()
 
 def to_bytes(n, length=None):
     if length is None:
@@ -75,7 +101,6 @@ if __name__ == '__main__':
         hostname = parts[0]
         port = int(parts[1])
         pem = get_server_certificate(hostname, port)
-
     else:
         with open(source, 'rb') as cert:
             pem = cert.read()
