@@ -75,7 +75,7 @@ const tasmota_tls_fingerprint = (_=>{
     a.every((v, i) => v == rsaEncryption[i]);
 
   // strip e.g. -----BEGIN PUBLIC KEY--- and base64 decode
-  const pemToDer = str => b64d(str.replace(/(?:^-.+)?\n/gm, ''));
+  const pemToDer = str => b64d(str.replace(/(^-.+)?\n/gm, ''));
 
   // crude ASN.1 tag-length-value decoder
   const getAsn1TLV = (u8, off) => {
@@ -151,12 +151,11 @@ const tasmota_tls_fingerprint = (_=>{
     }
 
     // serialize the public key in tasmota's "new" format
-    for (offset = i = 0; i < 3; ++i) {
+    for (offset = i = 0; i < 3;) {
       // 4 byte big endian length
       resultDV.setUint32(offset, n = pubKeyData[i].length);
-      offset += 4;
       // actual data
-      resultU8.set(pubKeyData[i], offset);
+      resultU8.set(pubKeyData[i++], offset += 4);
       offset += n;
     }
 
