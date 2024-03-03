@@ -70,12 +70,9 @@ const tasmota_tls_fingerprint = (_=>{
 
   // the OID for rsaEncryption
   const rsaEncryption = b64d('KoZIhvcNAQEB');
-
-  // check whether two arrays are equal (sloppy compare)
-  // XXX not constant time
-  const u8Equal = (a, b) =>
-    a.length == b.length &&
-    a.every((v, i) => v == b[i]);
+  const isRsaEncryption = a =>
+    a.length == 9 &&
+    a.every((v, i) => v == rsaEncryption[i]);
 
   // strip e.g. -----BEGIN PUBLIC KEY--- and base64 decode
   const pemToDer = str => b64d(str.replace(/(?:^-.+)?\n/gm, ''));
@@ -132,7 +129,7 @@ const tasmota_tls_fingerprint = (_=>{
       // we discard everyting until we find an rsa public key oui
       if (len && !form && type != 3) {
         if (!toSave_blockEnd) {
-          toSave_blockEnd = u8Equal(value, rsaEncryption) * 2;
+          toSave_blockEnd = isRsaEncryption(value) * 2;
         } else {
           // save the rsa public key data... if there's a leading zero, it
           // needs to be removed for compatibility with Tasmota and BearSSL
