@@ -133,7 +133,24 @@ const tasmota_tls_fingerprint = (_=>{
           // needs to be removed for compatibility with Tasmota and BearSSL
           pubKeyData[toSave_blockEnd] = value.slice(!value[0]); // (value[0] ? 0 : 1);
           // we're done once we have the key
-          if (!(--toSave_blockEnd)) { break; }
+          if (!(--toSave_blockEnd)) {
+            // serialize the public key in tasmota's "new" format
+            for (offset = i = 0; i < 3;) {
+              // 4 byte big endian length
+              resultDV.setUint32(offset, n = pubKeyData[i].length);
+              // actual data
+              resultU8.set(pubKeyData[i++], offset += 4);
+              offset += n;
+            }
+
+            // add SHA1 padding
+            resultU8[offset] = 0x80;
+            toSave_blockEnd = offset + 72 & ~63;
+            resultDV.setUint32(toSave_blockEnd-4, offset * 8);
+
+            // hash
+            return raw_sha1(resultU8, toSave_blockEnd);
+          }
         }
       }
 
@@ -147,22 +164,5 @@ const tasmota_tls_fingerprint = (_=>{
         der = value;
       }
     }
-
-    // serialize the public key in tasmota's "new" format
-    for (offset = i = 0; i < 3;) {
-      // 4 byte big endian length
-      resultDV.setUint32(offset, n = pubKeyData[i].length);
-      // actual data
-      resultU8.set(pubKeyData[i++], offset += 4);
-      offset += n;
-    }
-
-    // add SHA1 padding
-    resultU8[offset] = 0x80;
-    toSave_blockEnd = offset + 72 & ~63;
-    resultDV.setUint32(toSave_blockEnd-4, offset * 8);
-
-    // hash
-    return raw_sha1(resultU8, toSave_blockEnd);
   };
 })();
