@@ -104,8 +104,8 @@ const tasmota_tls_fingerprint = (_=>{
       }
     }
 
-    // new_offset, form, type, length, value
-    return [off, form, type, len, u8.slice(off, off+len)];
+    // new_offset, not_form, type, length, value
+    return [off, !form, type, len, u8.slice(off, off+len)];
   };
 
   return data => {
@@ -118,12 +118,12 @@ const tasmota_tls_fingerprint = (_=>{
     // crudely parse the ASN.1 data
     while (offset < der.length) {
       const [
-        new_offset, form, type, len, value
+        new_offset, not_form, type, len, value
       ] = /*@__INLINE__*/getAsn1TLV(der, offset);
       //console.log(der.length, offset, new_offset, toSave_blockEnd, form, type, len, value.toString());
 
       // we discard everyting until we find an rsa public key oui
-      if (len && !form && type != 3) {
+      if (len && not_form && type != 3) {
         if (!toSave_blockEnd) {
           toSave_blockEnd =
             len == 9 && // OID of rsaEncryption
@@ -138,7 +138,7 @@ const tasmota_tls_fingerprint = (_=>{
       }
 
       // skip over the data unles the form bit is set
-      offset = new_offset + !form * len; // (form ? 0 : len);
+      offset = new_offset + not_form * len; // (form ? 0 : len);
       // type 3 is "BIT STRING" and should contain the key as ASN.1 data
       if (type == 3) {
         // need to skip the first byte, not sure why
