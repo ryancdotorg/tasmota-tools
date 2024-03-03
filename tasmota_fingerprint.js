@@ -78,7 +78,7 @@ const tasmota_tls_fingerprint = (_=>{
     a.every((v, i) => v == b[i]);
 
   // strip e.g. -----BEGIN PUBLIC KEY--- and base64 decode
-  const pemToDer = str => b64d(str.replace(/(?:-+[^-]+-+|\n)/gm, ''));
+  const pemToDer = str => b64d(str.replace(/(?:^-.+)?\n/gm, ''));
 
   // crude ASN.1 tag-length-value decoder
   const getAsn1TLV = (u8, off) => {
