@@ -114,4 +114,4 @@ if __name__ == '__main__':
     bytes_new = b'\0\0\0\7ssh-rsa'+e_len+e_bytes+n_len+n_bytes
     fp_new = sha1(bytes_new).hexdigest()
 
-    print('Tasmota TLS fingerprint: ' + fmt_fingerprint(fp_new))
+    print(f'{fmt_fingerprint(fp_new)} (Tasmota v8.4.0+)')

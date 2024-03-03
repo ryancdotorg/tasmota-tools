@@ -36,8 +36,8 @@ do
         -subj '/CN=test' \
         -out "$CERT"
     fi
-    FP_JS=$(node cli.min.js "$CERT" | sed 's/.*: //')
-    FP_PY=$(python3 tasmota_fingerprint.py "$CERT" | sed 's/.*: //')
+    FP_JS=$(node cli.min.js "$CERT" | sed -E 's/\s+[(].*//')
+    FP_PY=$(python3 tasmota_fingerprint.py "$CERT" | sed -E 's/\s+[(].*//')
     if [ "$FP_JS" == "$FP_PY" ]
     then
       printf 'OKAY %s (bits:%s exp:%s)\n' "$FP_JS" $bits $e
