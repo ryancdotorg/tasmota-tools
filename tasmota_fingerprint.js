@@ -27,7 +27,7 @@ const tasmota_tls_fingerprint = (_=>{
             (
               W[j] =
                 (j < 16)
-                  ? ~~words[i + j]
+                  ? words[i + j]
                   : u * 2 | u < 0 // u << 1 | s >>> 31
             ) +
             1518500249 +
