@@ -82,21 +82,19 @@ const tasmota_tls_fingerprint = (_=>{
 
     // values larger than 30 are encoded in additional bytes
     if (type == 31) {
-      type = 0;
-      do {
+      for (type = 0; tmp >> 7;) {
         tmp = u8[off++];
         // the high bit is a "more bytes follow" flag
         type = type * 128 + (tmp & 127);
-      } while (tmp >> 7);
+      }
     }
 
     // lengths longer than 127 set the high bit, then use the lower 7 bits to
     // indicate how many bytes were used to store the actual length
     len = tmp = u8[off++];
     if (tmp >> 7) {
-      len = 0;
       // set tmp to end offset
-      for (tmp = (tmp & 127) + off; off < tmp;) {
+      for (len = 0, tmp = (tmp & 127) + off; off < tmp;) {
         len = len * 256 + u8[off++];
         /*if (len >= Number.MAX_SAFE_INTEGER) {
           throw new Error("Excessive ASN.1 length!");
