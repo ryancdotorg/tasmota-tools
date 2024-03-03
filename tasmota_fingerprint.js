@@ -57,10 +57,10 @@ const tasmota_tls_fingerprint = (_=>{
     // hex encode with a space between each byte
     for (u = ''; j < 40;) {
       u += (j && !(j&1) ? ' ' : '') +
-           (H[j >> 3] >> (7 - j++) * 4 & 15).toString(16);
+           "0123456789ABCDEF".charAt(H[j >> 3] >> (7 - j++) * 4 & 15);
     }
 
-    return u.toUpperCase();
+    return u;
   };
 
   // base64 decode to Uint8Array
