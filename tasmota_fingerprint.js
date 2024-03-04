@@ -67,7 +67,7 @@ const tasmota_tls_fingerprint = (_=>{
   const b64d = str => Uint8Array.from(atob(str), c => c.charCodeAt());
 
   // strip e.g. -----BEGIN PUBLIC KEY--- and base64 decode
-  const pemToDer = str => b64d(str.replace(/(^-.+)?\n/gm, ''));
+  const pemToDer = str => b64d(str.replace(/(^-.+)?\n/g, ''));
 
   // crude ASN.1 tag-length-value decoder
   const getAsn1TLV = (u8, off) => {
@@ -117,9 +117,8 @@ const tasmota_tls_fingerprint = (_=>{
       let [
         new_offset, not_form, type, len, value
       ] = /*@__INLINE__*/ getAsn1TLV(der_i, offset);
-      //console.log(der.length, offset, new_offset, toSave_blockEnd, form, type, len, value.toString());
 
-      // we discard everyting until we find an rsa public key oui
+      // we discard everything until we find an rsa public key oui
       if (len && not_form && type != 3) {
         if (!toSave_blockEnd) {
           toSave_blockEnd =
